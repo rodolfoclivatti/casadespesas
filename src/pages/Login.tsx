@@ -1,21 +1,23 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Home } from "lucide-react";
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Home } from "lucide-react";
 
 const Login = () => {
+  const { session } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Por enquanto, apenas redireciona para o dashboard
-    navigate('/');
-  };
+  useEffect(() => {
+    if (session) {
+      navigate('/');
+    }
+  }, [session, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
@@ -30,51 +32,43 @@ const Login = () => {
 
         <Card className="border-none shadow-xl rounded-2xl overflow-hidden">
           <CardHeader className="space-y-1 pt-8">
-            <CardTitle className="text-2xl text-center">Bem-vindo de volta</CardTitle>
+            <CardTitle className="text-2xl text-center">Bem-vindo</CardTitle>
             <CardDescription className="text-center">
-              Entre com seu e-mail para acessar sua conta
+              Entre ou crie sua conta para continuar
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
-            <CardContent className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="exemplo@email.com" 
-                  className="rounded-xl border-slate-200 focus:ring-rose-500"
-                  required 
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Senha</Label>
-                  <button type="button" className="text-xs text-rose-600 hover:underline">
-                    Esqueceu a senha?
-                  </button>
-                </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  className="rounded-xl border-slate-200 focus:ring-rose-500"
-                  required 
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4 pb-8">
-              <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white rounded-xl h-11 text-base font-semibold transition-all active:scale-95">
-                <LogIn className="mr-2 h-5 w-5" />
-                Entrar
-              </Button>
-              <div className="text-center text-sm text-slate-500">
-                Não tem uma conta?{" "}
-                <button type="button" className="text-rose-600 font-semibold hover:underline">
-                  Criar conta
-                </button>
-              </div>
-            </CardFooter>
-          </form>
+          <CardContent className="pb-8">
+            <Auth
+              supabaseClient={supabase}
+              appearance={{ 
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: '#e11d48',
+                      brandAccent: '#be123c',
+                    }
+                  }
+                }
+              }}
+              providers={[]}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: 'E-mail',
+                    password_label: 'Senha',
+                    button_label: 'Entrar',
+                  },
+                  sign_up: {
+                    email_label: 'E-mail',
+                    password_label: 'Senha',
+                    button_label: 'Cadastrar',
+                  }
+                }
+              }}
+              theme="light"
+            />
+          </CardContent>
         </Card>
       </div>
     </div>

@@ -7,9 +7,13 @@ import ExpenseChart from "@/components/dashboard/ExpenseChart";
 import AddTransactionDialog from "@/components/dashboard/AddTransactionDialog";
 import PeriodFilter from "@/components/dashboard/PeriodFilter";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Bell, Search, UserCircle } from "lucide-react";
+import { Bell, Search, LogOut, UserCircle } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const { signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
       {/* Header */}
@@ -37,6 +41,14 @@ const Index = () => {
             <button className="p-2 text-muted-foreground hover:text-rose-600 transition-colors">
               <Bell className="h-5 w-5" />
             </button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => signOut()}
+              className="text-muted-foreground hover:text-rose-600"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
             <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
               <UserCircle className="h-6 w-6" />
             </div>
