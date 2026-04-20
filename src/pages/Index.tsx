@@ -58,7 +58,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary Section */}
         <SummaryCards />
 
         {/* Main Content Grid */}
