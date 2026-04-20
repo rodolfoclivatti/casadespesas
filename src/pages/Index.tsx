@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import SummaryCards from "@/components/dashboard/SummaryCards";
 import TransactionList from "@/components/dashboard/TransactionList";
 import ExpenseChart from "@/components/dashboard/ExpenseChart";
@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { signOut } = useAuth();
+  const [period, setPeriod] = useState('this-month');
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
-      {/* Header */}
       <header className="sticky top-0 z-10 w-full border-b bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -57,7 +57,6 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 pt-8 space-y-8">
-        {/* Welcome & Filters Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Controle de Gastos 👋</h2>
@@ -65,18 +64,16 @@ const Index = () => {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
-            <PeriodFilter />
+            <PeriodFilter value={period} onValueChange={setPeriod} />
             <AddTransactionDialog />
           </div>
         </div>
 
-        {/* Summary Section */}
-        <SummaryCards />
+        <SummaryCards period={period} />
 
-        {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
-          <TransactionList />
-          <ExpenseChart />
+          <TransactionList period={period} />
+          <ExpenseChart period={period} />
         </div>
       </main>
 

@@ -6,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Home, Car, Coffee, Utensils, HelpCircle, Loader2 } from "lucide-react";
+import { Home, Car, Coffee, Utensils, HelpCircle, Loader2 } from "lucide-react";
+import { startOfMonth, endOfMonth, subMonths, addMonths, format } from 'date-fns';
 
 const categoryIcons: Record<string, any> = {
   "Alimentação": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -16,14 +17,39 @@ const categoryIcons: Record<string, any> = {
   "Outros": { icon: HelpCircle, color: "text-slate-600", bg: "bg-slate-50" },
 };
 
-const TransactionList = () => {
+const TransactionList = ({ period }: { period: string }) => {
   const { data: transactions, isLoading } = useQuery({
-    queryKey: ['transactions'],
+    queryKey: ['transactions', period],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('DESPESAS FINANCEIRAS')
-        .select('*')
-        .order('DATA VENCIMENTO', { ascending: false });
+      let query = supabase.from('DESPESAS FINANCEIRAS').select('*');
+      
+      const now = new Date();
+      let startDate, endDate;
+
+      if (period === 'this-month') {
+        startDate = format(startOfMonth(now), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(now), 'yyyy-MM-dd');
+      } else if (period === 'last-month') {
+        const lastMonth = subMonths(now, 1);
+        startDate = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
+      } else if (period === 'next-month') {
+        const nextMonth = addMonths(now, 1);
+        startDate = format(startOfMonth(nextMonth), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(nextMonth), 'yyyy-MM-dd');
+      } else if (period === 'next-3-months') {
+        startDate = format(now, 'yyyy-MM-dd');
+        endDate = format(addMonths(now, 3), 'yyyy-MM-dd');
+      } else if (period === 'this-year') {
+        startDate = `${now.getFullYear()}-01-01`;
+        endDate = `${now.getFullYear()}-12-31`;
+      }
+
+      if (startDate && endDate) {
+        query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+      }
+
+      const { data, error } = await query.order('DATA VENCIMENTO', { ascending: true });
       
       if (error) throw error;
       return data;
@@ -41,8 +67,10 @@ const TransactionList = () => {
   return (
     <Card className="col-span-1 lg:col-span-2 border-none shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold">Despesas Recentes</CardTitle>
-        <Badge variant="outline" className="cursor-pointer hover:bg-accent">Ver todas</Badge>
+        <CardTitle className="text-lg font-semibold">
+          {period.includes('next') ? 'Projeção de Despesas' : 'Despesas do Período'}
+        </CardTitle>
+        <Badge variant="outline">{transactions?.length || 0} itens</Badge>
       </CardHeader>
       <CardContent>
         <Table>
@@ -84,7 +112,7 @@ const TransactionList = () => {
             {transactions?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  Nenhuma despesa encontrada.
+                  Nenhuma despesa encontrada para este período.
                 </TableCell>
               </TableRow>
             )}

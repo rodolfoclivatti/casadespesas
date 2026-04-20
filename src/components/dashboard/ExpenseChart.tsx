@@ -15,6 +15,7 @@ import {
   Cell
 } from 'recharts';
 import { Loader2 } from 'lucide-react';
+import { startOfMonth, endOfMonth, subMonths, addMonths, format } from 'date-fns';
 
 const COLORS: Record<string, string> = {
   'Moradia': '#4F46E5',
@@ -24,14 +25,39 @@ const COLORS: Record<string, string> = {
   'Outros': '#6B7280',
 };
 
-const ExpenseChart = () => {
+const ExpenseChart = ({ period }: { period: string }) => {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ['chart-data'],
+    queryKey: ['chart-data', period],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('DESPESAS FINANCEIRAS')
-        .select('CATEGORIA, VALOR');
+      let query = supabase.from('DESPESAS FINANCEIRAS').select('CATEGORIA, VALOR, "DATA VENCIMENTO"');
       
+      const now = new Date();
+      let startDate, endDate;
+
+      if (period === 'this-month') {
+        startDate = format(startOfMonth(now), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(now), 'yyyy-MM-dd');
+      } else if (period === 'last-month') {
+        const lastMonth = subMonths(now, 1);
+        startDate = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
+      } else if (period === 'next-month') {
+        const nextMonth = addMonths(now, 1);
+        startDate = format(startOfMonth(nextMonth), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(nextMonth), 'yyyy-MM-dd');
+      } else if (period === 'next-3-months') {
+        startDate = format(now, 'yyyy-MM-dd');
+        endDate = format(addMonths(now, 3), 'yyyy-MM-dd');
+      } else if (period === 'this-year') {
+        startDate = `${now.getFullYear()}-01-01`;
+        endDate = `${now.getFullYear()}-12-31`;
+      }
+
+      if (startDate && endDate) {
+        query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
 
       const grouped = data.reduce((acc: any, curr) => {
@@ -51,7 +77,7 @@ const ExpenseChart = () => {
   return (
     <Card className="col-span-1 border-none shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Gastos por Categoria</CardTitle>
+        <CardTitle className="text-lg font-semibold">Distribuição por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full flex items-center justify-center">
