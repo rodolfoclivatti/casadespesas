@@ -9,6 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle } from "lucide-react";
 import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
+interface TransactionListProps {
+  month: string;
+  year: string;
+}
+
 const categoryIcons: Record<string, any> = {
   "Alimentação": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
   "Moradia": { icon: Home, color: "text-blue-600", bg: "bg-blue-50" },
@@ -17,26 +22,21 @@ const categoryIcons: Record<string, any> = {
   "Outros": { icon: HelpCircle, color: "text-slate-600", bg: "bg-slate-50" },
 };
 
-const TransactionList = ({ period }: { period: string }) => {
+const TransactionList = ({ month, year }: TransactionListProps) => {
   const { data: transactions, isLoading, error } = useQuery({
-    queryKey: ['transactions', period],
+    queryKey: ['transactions', month, year],
     queryFn: async () => {
       let query = supabase.from('DESPESAS FINANCEIRAS').select('*');
       
-      const now = new Date();
-      let startDate, endDate;
-
-      if (period === 'this-year') {
-        startDate = `${now.getFullYear()}-01-01`;
-        endDate = `${now.getFullYear()}-12-31`;
-      } else if (period.includes('-')) {
-        const date = parseISO(`${period}-01`);
-        startDate = format(startOfMonth(date), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(date), 'yyyy-MM-dd');
-      }
-
-      if (startDate && endDate && period !== 'all-time') {
-        query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+      if (year !== 'all') {
+        if (month !== 'all') {
+          const date = parseISO(`${year}-${month}-01`);
+          const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+          const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
+          query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+        } else {
+          query = query.gte('DATA VENCIMENTO', `${year}-01-01`).lte('DATA VENCIMENTO', `${year}-12-31`);
+        }
       }
 
       const { data, error } = await query.order('DATA VENCIMENTO', { ascending: true });

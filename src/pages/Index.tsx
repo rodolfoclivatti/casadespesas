@@ -10,11 +10,14 @@ import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Bell, Search, LogOut, UserCircle } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { format } from 'date-fns';
 
 const Index = () => {
   const { signOut } = useAuth();
-  // Alterado para 'all-time' por padrão para facilitar a visualização inicial dos dados importados
-  const [period, setPeriod] = useState('all-time');
+  
+  // Estado separado para mês e ano
+  const [month, setMonth] = useState(format(new Date(), 'MM'));
+  const [year, setYear] = useState(format(new Date(), 'yyyy'));
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
@@ -65,16 +68,21 @@ const Index = () => {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
-            <PeriodFilter value={period} onValueChange={setPeriod} />
+            <PeriodFilter 
+              month={month} 
+              year={year} 
+              onMonthChange={setMonth} 
+              onYearChange={setYear} 
+            />
             <AddTransactionDialog />
           </div>
         </div>
 
-        <SummaryCards period={period} />
+        <SummaryCards month={month} year={year} />
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <TransactionList period={period} />
-          <ExpenseChart period={period} />
+          <TransactionList month={month} year={year} />
+          <ExpenseChart month={month} year={year} />
         </div>
       </main>
 

@@ -17,6 +17,11 @@ import {
 import { Loader2 } from 'lucide-react';
 import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
+interface ExpenseChartProps {
+  month: string;
+  year: string;
+}
+
 const COLORS: Record<string, string> = {
   'Moradia': '#4F46E5',
   'Alimentação': '#10B981',
@@ -25,26 +30,21 @@ const COLORS: Record<string, string> = {
   'Outros': '#6B7280',
 };
 
-const ExpenseChart = ({ period }: { period: string }) => {
+const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ['chart-data', period],
+    queryKey: ['chart-data', month, year],
     queryFn: async () => {
       let query = supabase.from('DESPESAS FINANCEIRAS').select('CATEGORIA, VALOR, "DATA VENCIMENTO"');
       
-      const now = new Date();
-      let startDate, endDate;
-
-      if (period === 'this-year') {
-        startDate = `${now.getFullYear()}-01-01`;
-        endDate = `${now.getFullYear()}-12-31`;
-      } else if (period.includes('-')) {
-        const date = parseISO(`${period}-01`);
-        startDate = format(startOfMonth(date), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(date), 'yyyy-MM-dd');
-      }
-
-      if (startDate && endDate && period !== 'all-time') {
-        query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+      if (year !== 'all') {
+        if (month !== 'all') {
+          const date = parseISO(`${year}-${month}-01`);
+          const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+          const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
+          query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+        } else {
+          query = query.gte('DATA VENCIMENTO', `${year}-01-01`).lte('DATA VENCIMENTO', `${year}-12-31`);
+        }
       }
 
       const { data, error } = await query;

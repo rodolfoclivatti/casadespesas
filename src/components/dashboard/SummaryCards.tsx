@@ -7,27 +7,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownCircle, Loader2 } from "lucide-react";
 import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
-const SummaryCards = ({ period }: { period: string }) => {
+interface SummaryCardsProps {
+  month: string;
+  year: string;
+}
+
+const SummaryCards = ({ month, year }: SummaryCardsProps) => {
   const { data: total, isLoading } = useQuery({
-    queryKey: ['total-expenses', period],
+    queryKey: ['total-expenses', month, year],
     queryFn: async () => {
       let query = supabase.from('DESPESAS FINANCEIRAS').select('VALOR');
       
-      const now = new Date();
-      let startDate, endDate;
-
-      if (period === 'this-year') {
-        startDate = `${now.getFullYear()}-01-01`;
-        endDate = `${now.getFullYear()}-12-31`;
-      } else if (period.includes('-')) {
-        // Formato yyyy-MM
-        const date = parseISO(`${period}-01`);
-        startDate = format(startOfMonth(date), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(date), 'yyyy-MM-dd');
-      }
-
-      if (startDate && endDate && period !== 'all-time') {
-        query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+      if (year !== 'all') {
+        if (month !== 'all') {
+          // Mês e Ano específicos
+          const date = parseISO(`${year}-${month}-01`);
+          const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+          const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
+          query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+        } else {
+          // Ano inteiro
+          query = query.gte('DATA VENCIMENTO', `${year}-01-01`).lte('DATA VENCIMENTO', `${year}-12-31`);
+        }
       }
 
       const { data, error } = await query;
