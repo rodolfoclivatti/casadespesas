@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Home, Car, Coffee, Utensils, HelpCircle, Loader2 } from "lucide-react";
+import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle } from "lucide-react";
 import { startOfMonth, endOfMonth, subMonths, addMonths, format } from 'date-fns';
 
 const categoryIcons: Record<string, any> = {
@@ -18,9 +18,10 @@ const categoryIcons: Record<string, any> = {
 };
 
 const TransactionList = ({ period }: { period: string }) => {
-  const { data: transactions, isLoading } = useQuery({
+  const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['transactions', period],
     queryFn: async () => {
+      console.log('Buscando transações para o período:', period);
       let query = supabase.from('DESPESAS FINANCEIRAS').select('*');
       
       const now = new Date();
@@ -45,13 +46,18 @@ const TransactionList = ({ period }: { period: string }) => {
         endDate = `${now.getFullYear()}-12-31`;
       }
 
-      if (startDate && endDate) {
+      if (startDate && endDate && period !== 'all-time') {
         query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
       }
 
       const { data, error } = await query.order('DATA VENCIMENTO', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar despesas:', error);
+        throw error;
+      }
+      
+      console.log('Dados recebidos:', data);
       return data;
     },
   });
@@ -60,6 +66,16 @@ const TransactionList = ({ period }: { period: string }) => {
     return (
       <Card className="col-span-1 lg:col-span-2 border-none shadow-sm flex items-center justify-center p-12">
         <Loader2 className="h-8 w-8 text-rose-600 animate-spin" />
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="col-span-1 lg:col-span-2 border-none shadow-sm p-12 text-center">
+        <AlertCircle className="h-12 w-12 text-rose-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold">Erro ao carregar dados</h3>
+        <p className="text-muted-foreground">Verifique se a tabela existe e se você tem permissão.</p>
       </Card>
     );
   }
@@ -111,8 +127,11 @@ const TransactionList = ({ period }: { period: string }) => {
             })}
             {transactions?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  Nenhuma despesa encontrada para este período.
+                <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2">
+                    <p>Nenhuma despesa encontrada para este período.</p>
+                    <p className="text-xs">Tente mudar o filtro para "Todo o Período".</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
