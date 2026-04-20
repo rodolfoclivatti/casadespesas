@@ -2,35 +2,35 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from "lucide-react";
+import { ArrowDownCircle, CreditCard, Calendar, AlertCircle } from "lucide-react";
 
 const SummaryCards = () => {
   const stats = [
     {
-      title: "Saldo Total",
-      amount: "R$ 4.250,00",
-      icon: Wallet,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-    },
-    {
-      title: "Receitas",
-      amount: "R$ 7.000,00",
-      icon: ArrowUpCircle,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-    },
-    {
-      title: "Despesas",
+      title: "Total de Gastos",
       amount: "R$ 2.750,00",
       icon: ArrowDownCircle,
       color: "text-rose-600",
       bg: "bg-rose-50",
     },
     {
-      title: "Economia",
-      amount: "39%",
-      icon: TrendingUp,
+      title: "Média Diária",
+      amount: "R$ 91,66",
+      icon: Calendar,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+    },
+    {
+      title: "Transações",
+      amount: "12",
+      icon: CreditCard,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
+    {
+      title: "Maior Gasto",
+      amount: "R$ 1.200,00",
+      icon: AlertCircle,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
@@ -51,7 +51,7 @@ const SummaryCards = () => {
           <CardContent>
             <div className="text-2xl font-bold">{stat.amount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              +2.5% em relação ao mês passado
+              No período selecionado
             </p>
           </CardContent>
         </Card>

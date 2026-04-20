@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Home, Car, Coffee, MoreHorizontal } from "lucide-react";
+import { ShoppingCart, Home, Car, Coffee } from "lucide-react";
 
 const transactions = [
   {
@@ -28,16 +28,6 @@ const transactions = [
     bg: "bg-blue-50",
   },
   {
-    id: 3,
-    description: "Salário Mensal",
-    category: "Renda",
-    amount: 7000.00,
-    date: "2024-03-05",
-    icon: MoreHorizontal,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
-  },
-  {
     id: 4,
     description: "Posto Shell",
     category: "Transporte",
@@ -47,13 +37,23 @@ const transactions = [
     color: "text-amber-600",
     bg: "bg-amber-50",
   },
+  {
+    id: 5,
+    description: "Starbucks",
+    category: "Lazer",
+    amount: -25.90,
+    date: "2024-03-21",
+    icon: Coffee,
+    color: "text-rose-600",
+    bg: "bg-rose-50",
+  },
 ];
 
 const TransactionList = () => {
   return (
     <Card className="col-span-1 lg:col-span-2 border-none shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold">Transações Recentes</CardTitle>
+        <CardTitle className="text-lg font-semibold">Despesas Recentes</CardTitle>
         <Badge variant="outline" className="cursor-pointer hover:bg-accent">Ver todas</Badge>
       </CardHeader>
       <CardContent>
@@ -85,8 +85,7 @@ const TransactionList = () => {
                 <TableCell className="text-muted-foreground">
                   {new Date(transaction.date).toLocaleDateString('pt-BR')}
                 </TableCell>
-                <TableCell className={`text-right font-semibold ${transaction.amount > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {transaction.amount > 0 ? '+' : ''}
+                <TableCell className="text-right font-semibold text-rose-600">
                   {transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </TableCell>
               </TableRow>

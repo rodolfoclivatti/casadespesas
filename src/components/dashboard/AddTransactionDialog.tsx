@@ -20,16 +20,16 @@ const AddTransactionDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6">
+        <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-full px-6">
           <PlusCircle className="mr-2 h-4 w-4" />
-          Nova Transação
+          Nova Despesa
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Adicionar Transação</DialogTitle>
+          <DialogTitle>Adicionar Despesa</DialogTitle>
           <DialogDescription>
-            Preencha os detalhes da sua nova despesa ou receita.
+            Preencha os detalhes do seu novo gasto.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -52,25 +52,17 @@ const AddTransactionDialog = () => {
                 <SelectItem value="alimentacao">Alimentação</SelectItem>
                 <SelectItem value="transporte">Transporte</SelectItem>
                 <SelectItem value="lazer">Lazer</SelectItem>
-                <SelectItem value="renda">Renda / Salário</SelectItem>
+                <SelectItem value="outros">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="type">Tipo</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="expense">Despesa</SelectItem>
-                <SelectItem value="income">Receita</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="date">Data</Label>
+            <Input id="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">Salvar Transação</Button>
+          <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">Salvar Despesa</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
