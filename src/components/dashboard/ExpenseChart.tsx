@@ -15,7 +15,7 @@ import {
   Cell
 } from 'recharts';
 import { Loader2 } from 'lucide-react';
-import { startOfMonth, endOfMonth, subMonths, addMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
 const COLORS: Record<string, string> = {
   'Moradia': '#4F46E5',
@@ -34,26 +34,16 @@ const ExpenseChart = ({ period }: { period: string }) => {
       const now = new Date();
       let startDate, endDate;
 
-      if (period === 'this-month') {
-        startDate = format(startOfMonth(now), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(now), 'yyyy-MM-dd');
-      } else if (period === 'last-month') {
-        const lastMonth = subMonths(now, 1);
-        startDate = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
-      } else if (period === 'next-month') {
-        const nextMonth = addMonths(now, 1);
-        startDate = format(startOfMonth(nextMonth), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(nextMonth), 'yyyy-MM-dd');
-      } else if (period === 'next-3-months') {
-        startDate = format(now, 'yyyy-MM-dd');
-        endDate = format(addMonths(now, 3), 'yyyy-MM-dd');
-      } else if (period === 'this-year') {
+      if (period === 'this-year') {
         startDate = `${now.getFullYear()}-01-01`;
         endDate = `${now.getFullYear()}-12-31`;
+      } else if (period.includes('-')) {
+        const date = parseISO(`${period}-01`);
+        startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(date), 'yyyy-MM-dd');
       }
 
-      if (startDate && endDate) {
+      if (startDate && endDate && period !== 'all-time') {
         query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
       }
 

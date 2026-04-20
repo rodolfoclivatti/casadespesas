@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle } from "lucide-react";
-import { startOfMonth, endOfMonth, subMonths, addMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
 const categoryIcons: Record<string, any> = {
   "Alimentação": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -21,29 +21,18 @@ const TransactionList = ({ period }: { period: string }) => {
   const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['transactions', period],
     queryFn: async () => {
-      console.log('Buscando transações para o período:', period);
       let query = supabase.from('DESPESAS FINANCEIRAS').select('*');
       
       const now = new Date();
       let startDate, endDate;
 
-      if (period === 'this-month') {
-        startDate = format(startOfMonth(now), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(now), 'yyyy-MM-dd');
-      } else if (period === 'last-month') {
-        const lastMonth = subMonths(now, 1);
-        startDate = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
-      } else if (period === 'next-month') {
-        const nextMonth = addMonths(now, 1);
-        startDate = format(startOfMonth(nextMonth), 'yyyy-MM-dd');
-        endDate = format(endOfMonth(nextMonth), 'yyyy-MM-dd');
-      } else if (period === 'next-3-months') {
-        startDate = format(now, 'yyyy-MM-dd');
-        endDate = format(addMonths(now, 3), 'yyyy-MM-dd');
-      } else if (period === 'this-year') {
+      if (period === 'this-year') {
         startDate = `${now.getFullYear()}-01-01`;
         endDate = `${now.getFullYear()}-12-31`;
+      } else if (period.includes('-')) {
+        const date = parseISO(`${period}-01`);
+        startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(date), 'yyyy-MM-dd');
       }
 
       if (startDate && endDate && period !== 'all-time') {
@@ -52,12 +41,7 @@ const TransactionList = ({ period }: { period: string }) => {
 
       const { data, error } = await query.order('DATA VENCIMENTO', { ascending: true });
       
-      if (error) {
-        console.error('Erro ao buscar despesas:', error);
-        throw error;
-      }
-      
-      console.log('Dados recebidos:', data);
+      if (error) throw error;
       return data;
     },
   });
@@ -75,7 +59,7 @@ const TransactionList = ({ period }: { period: string }) => {
       <Card className="col-span-1 lg:col-span-2 border-none shadow-sm p-12 text-center">
         <AlertCircle className="h-12 w-12 text-rose-600 mx-auto mb-4" />
         <h3 className="text-lg font-semibold">Erro ao carregar dados</h3>
-        <p className="text-muted-foreground">Verifique se a tabela existe e se você tem permissão.</p>
+        <p className="text-muted-foreground">Verifique sua conexão ou permissões.</p>
       </Card>
     );
   }
@@ -84,7 +68,7 @@ const TransactionList = ({ period }: { period: string }) => {
     <Card className="col-span-1 lg:col-span-2 border-none shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold">
-          {period.includes('next') ? 'Projeção de Despesas' : 'Despesas do Período'}
+          Despesas do Período
         </CardTitle>
         <Badge variant="outline">{transactions?.length || 0} itens</Badge>
       </CardHeader>
@@ -128,10 +112,7 @@ const TransactionList = ({ period }: { period: string }) => {
             {transactions?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                  <div className="flex flex-col items-center gap-2">
-                    <p>Nenhuma despesa encontrada para este período.</p>
-                    <p className="text-xs">Tente mudar o filtro para "Todo o Período".</p>
-                  </div>
+                  Nenhuma despesa encontrada para este período.
                 </TableCell>
               </TableRow>
             )}
