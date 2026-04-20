@@ -12,10 +12,15 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const auth = useAuth();
+const ALLOWED_EMAILS = [
+  'rclivatti@hotmail.com',
+  'carolgclivatti@hotmail.com'
+];
 
-  if (auth.loading) {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading, signOut } = useAuth();
+
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="h-8 w-8 text-rose-600 animate-spin mb-4" />
@@ -24,14 +29,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!auth.session) {
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Restrição de e-mail
+  if (!ALLOWED_EMAILS.includes(session.user.email || '')) {
+    signOut();
     return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 };
 
-export default function App() {
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -56,4 +67,6 @@ export default function App() {
       </AuthProvider>
     </QueryClientProvider>
   );
-}
+};
+
+export default App;
