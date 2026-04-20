@@ -13,9 +13,9 @@ import { Loader2 } from "lucide-react";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading } = useAuth();
+  const auth = useAuth();
 
-  if (loading) {
+  if (auth.loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="h-8 w-8 text-rose-600 animate-spin mb-4" />
@@ -24,14 +24,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!session) {
+  if (!auth.session) {
     return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 };
 
-const App = () => {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -56,6 +56,4 @@ const App = () => {
       </AuthProvider>
     </QueryClientProvider>
   );
-};
-
-export default App;
+}
