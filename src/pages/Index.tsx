@@ -5,6 +5,7 @@ import SummaryCards from "@/components/dashboard/SummaryCards";
 import TransactionList from "@/components/dashboard/TransactionList";
 import ExpenseChart from "@/components/dashboard/ExpenseChart";
 import AddTransactionDialog from "@/components/dashboard/AddTransactionDialog";
+import PeriodFilter from "@/components/dashboard/PeriodFilter";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { Bell, Search, UserCircle } from "lucide-react";
 
@@ -44,13 +45,17 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 pt-8 space-y-8">
-        {/* Welcome Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Welcome & Filters Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Olá, Bem-vindo de volta! 👋</h2>
             <p className="text-muted-foreground">Aqui está o resumo das finanças da sua casa hoje.</p>
           </div>
-          <AddTransactionDialog />
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodFilter />
+            <AddTransactionDialog />
+          </div>
         </div>
 
         {/* Summary Cards */}
