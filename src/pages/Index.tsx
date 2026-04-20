@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { signOut } = useAuth();
-  const [period, setPeriod] = useState('this-month');
+  // Alterado para 'all-time' por padrão para facilitar a visualização inicial dos dados importados
+  const [period, setPeriod] = useState('all-time');
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
