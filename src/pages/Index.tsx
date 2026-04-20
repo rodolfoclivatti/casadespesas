@@ -6,18 +6,23 @@ import TransactionList from "@/components/dashboard/TransactionList";
 import ExpenseChart from "@/components/dashboard/ExpenseChart";
 import AddTransactionDialog from "@/components/dashboard/AddTransactionDialog";
 import PeriodFilter from "@/components/dashboard/PeriodFilter";
+import ComparisonSummary from "@/components/dashboard/ComparisonSummary";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Bell, Search, LogOut, UserCircle } from "lucide-react";
+import { Bell, Search, LogOut, UserCircle, columns2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/label";
 import { format } from 'date-fns';
 
 const Index = () => {
   const { signOut } = useAuth();
+  const [isComparisonMode, setIsComparisonMode] = useState(false);
   
-  // Estado separado para mês e ano
-  const [month, setMonth] = useState(format(new Date(), 'MM'));
-  const [year, setYear] = useState(format(new Date(), 'yyyy'));
+  const [month1, setMonth1] = useState(format(new Date(), 'MM'));
+  const [year1, setYear1] = useState(format(new Date(), 'yyyy'));
+
+  const [month2, setMonth2] = useState(format(new Date(), 'MM'));
+  const [year2, setYear2] = useState(format(new Date(), 'yyyy'));
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
@@ -32,25 +37,15 @@ const Index = () => {
             </h1>
           </div>
           
-          <div className="hidden md:flex items-center bg-slate-100 rounded-full px-3 py-1.5 w-96">
-            <Search className="h-4 w-4 text-muted-foreground mr-2" />
-            <input 
-              type="text" 
-              placeholder="Buscar despesas..." 
-              className="bg-transparent border-none outline-none text-sm w-full"
-            />
-          </div>
-
           <div className="flex items-center gap-4">
-            <button className="p-2 text-muted-foreground hover:text-rose-600 transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
             <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => signOut()}
-              className="text-muted-foreground hover:text-rose-600"
+              variant={isComparisonMode ? "default" : "outline"}
+              onClick={() => setIsComparisonMode(!isComparisonMode)}
+              className={isComparisonMode ? "bg-rose-600" : ""}
             >
+              {isComparisonMode ? "Sair do Comparativo" : "Modo Comparativo"}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => signOut()}>
               <LogOut className="h-5 w-5" />
             </Button>
             <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
@@ -63,26 +58,60 @@ const Index = () => {
       <main className="container mx-auto px-4 pt-8 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Controle de Gastos 👋</h2>
-            <p className="text-muted-foreground">Acompanhe para onde está indo o dinheiro da sua casa.</p>
+            <h2 className="text-3xl font-bold tracking-tight">
+              {isComparisonMode ? "Comparativo de Períodos" : "Controle de Gastos 👋"}
+            </h2>
+            <p className="text-muted-foreground">
+              {isComparisonMode ? "Compare as despesas entre dois meses diferentes." : "Acompanhe para onde está indo o dinheiro da sua casa."}
+            </p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-3">
-            <PeriodFilter 
-              month={month} 
-              year={year} 
-              onMonthChange={setMonth} 
-              onYearChange={setYear} 
-            />
-            <AddTransactionDialog />
+          <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div className="space-y-2">
+              {isComparisonMode && <span className="text-xs font-bold text-rose-600 uppercase">Período A</span>}
+              <PeriodFilter 
+                month={month1} 
+                year={year1} 
+                onMonthChange={setMonth1} 
+                onYearChange={setYear1} 
+              />
+            </div>
+
+            {isComparisonMode && (
+              <>
+                <div className="h-10 w-px bg-slate-200 hidden md:block" />
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-indigo-600 uppercase">Período B</span>
+                  <PeriodFilter 
+                    month={month2} 
+                    year={year2} 
+                    onMonthChange={setMonth2} 
+                    onYearChange={setYear2} 
+                  />
+                </div>
+              </>
+            )}
+            
+            {!isComparisonMode && <AddTransactionDialog />}
           </div>
         </div>
 
-        <SummaryCards month={month} year={year} />
+        {isComparisonMode ? (
+          <ComparisonSummary 
+            period1={{ month: month1, year: year1 }} 
+            period2={{ month: month2, year: year2 }} 
+          />
+        ) : (
+          <SummaryCards month={month1} year={year1} />
+        )}
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <TransactionList month={month} year={year} />
-          <ExpenseChart month={month} year={year} />
+          <ExpenseChart 
+            month={month1} 
+            year={year1} 
+            comparison={isComparisonMode ? { month: month2, year: year2 } : undefined} 
+          />
+          {!isComparisonMode && <TransactionList month={month1} year={year1} />}
         </div>
       </main>
 
