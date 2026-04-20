@@ -1,10 +1,24 @@
 "use client";
 
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDownCircle } from "lucide-react";
+import { ArrowDownCircle, Loader2 } from "lucide-react";
 
 const SummaryCards = () => {
+  const { data: total, isLoading } = useQuery({
+    queryKey: ['total-expenses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('DESPESAS FINANCEIRAS')
+        .select('VALOR');
+      
+      if (error) throw error;
+      return data.reduce((acc, curr) => acc + Number(curr.VALOR), 0);
+    },
+  });
+
   return (
     <div className="flex justify-start">
       <Card className="w-full md:w-72 border-none shadow-sm hover:shadow-md transition-shadow bg-white">
@@ -17,7 +31,13 @@ const SummaryCards = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-rose-600">R$ 2.750,00</div>
+          {isLoading ? (
+            <Loader2 className="h-6 w-6 text-rose-600 animate-spin" />
+          ) : (
+            <div className="text-3xl font-bold text-rose-600">
+              {total?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground mt-1">
             No período selecionado
           </p>
