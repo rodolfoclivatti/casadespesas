@@ -1,13 +1,15 @@
 "use client";
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { startOfMonth, endOfMonth, parseISO, format, isValid } from 'date-fns';
+import { showSuccess, showError } from '@/utils/toast';
 
 interface TransactionListProps {
   month: string;
@@ -23,6 +25,8 @@ const categoryIcons: Record<string, any> = {
 };
 
 const TransactionList = ({ month, year }: TransactionListProps) => {
+  const queryClient = useQueryClient();
+
   const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['transactions', month, year],
     queryFn: async () => {
@@ -46,6 +50,26 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
       if (error) throw error;
       return data;
     },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from('DESPESAS FINANCEIRAS')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['total-expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['chart-data'] });
+      showSuccess('Expense deleted successfully');
+    },
+    onError: (error: any) => {
+      showError('Error deleting expense: ' + error.message);
+    }
   });
 
   if (isLoading) {
@@ -84,7 +108,8 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                 <TableHead className="pl-4 md:pl-0">Description</TableHead>
                 <TableHead className="hidden sm:table-cell">Category</TableHead>
                 <TableHead>Due Date</TableHead>
-                <TableHead className="text-right pr-4 md:pr-0">Amount</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -111,15 +136,26 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                     <TableCell className="text-muted-foreground text-xs md:text-sm whitespace-nowrap">
                       {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }) : '-'}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-rose-600 pr-4 md:pr-0 text-sm md:text-base">
+                    <TableCell className="text-right font-semibold text-rose-600 text-sm md:text-base">
                       {Number(item.VALOR).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                    </TableCell>
+                    <TableCell className="pr-4 md:pr-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => deleteMutation.mutate(item.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
               })}
               {transactions?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     No expenses found.
                   </TableCell>
                 </TableRow>
