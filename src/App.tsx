@@ -12,13 +12,8 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-const ALLOWED_EMAILS = [
-  'rclivatti@hotmail.com',
-  'carolgclivatti@hotmail.com'
-];
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading, signOut } = useAuth();
+  const { session, loading } = useAuth();
 
   if (loading) {
     return (
@@ -30,12 +25,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Restrição de e-mail
-  if (!ALLOWED_EMAILS.includes(session.user.email || '')) {
-    signOut();
     return <Navigate to="/login" replace />;
   }
 

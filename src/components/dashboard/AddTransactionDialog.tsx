@@ -40,8 +40,7 @@ const AddTransactionDialog = () => {
           "DESCRIÇÃO": description,
           "VALOR": parseFloat(amount),
           "CATEGORIA": category,
-          "DATA VENCIMENTO": date,
-          "user_id": user.id
+          "DATA VENCIMENTO": date
         }]);
       
       if (error) throw error;
