@@ -34,11 +34,13 @@ const AddTransactionDialog = () => {
     mutationFn: async () => {
       if (!user) throw new Error("User not authenticated");
 
+      const parsedAmount = parseFloat(amount);
+      
       const { error } = await supabase
         .from('DESPESAS FINANCEIRAS')
         .insert([{
           "DESCRIÇÃO": description,
-          "VALOR": parseFloat(amount),
+          "VALOR": parsedAmount,
           "CATEGORIA": category,
           "DATA VENCIMENTO": date,
           "user_id": user.id
@@ -68,10 +70,18 @@ const AddTransactionDialog = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!description || !amount || !category || !date) {
       showError('Please fill in all fields.');
       return;
     }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      showError('Please enter a valid amount greater than zero.');
+      return;
+    }
+
     mutation.mutate();
   };
 
@@ -107,6 +117,7 @@ const AddTransactionDialog = () => {
                 id="amount" 
                 type="number" 
                 step="0.01"
+                min="0.01"
                 placeholder="0.00" 
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
