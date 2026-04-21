@@ -18,8 +18,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { showSuccess, showError } from '@/utils/toast';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const AddTransactionDialog = () => {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -30,13 +32,16 @@ const AddTransactionDialog = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { error } = await supabase
         .from('DESPESAS FINANCEIRAS')
         .insert([{
           "DESCRIÇÃO": description,
           "VALOR": parseFloat(amount),
           "CATEGORIA": category,
-          "DATA VENCIMENTO": date
+          "DATA VENCIMENTO": date,
+          "user_id": user.id
         }]);
       
       if (error) throw error;
@@ -49,7 +54,7 @@ const AddTransactionDialog = () => {
       setOpen(false);
       resetForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       showError('Erro ao salvar despesa: ' + error.message);
     }
   });
