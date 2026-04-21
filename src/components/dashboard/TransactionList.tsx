@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle } from "lucide-react";
-import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
+import { startOfMonth, endOfMonth, parseISO, format, isValid } from 'date-fns';
 
 interface TransactionListProps {
   month: string;
@@ -30,17 +30,19 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
       
       if (year !== 'all') {
         if (month !== 'all') {
-          const date = parseISO(`${year}-${month}-01`);
-          const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
-          const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
-          query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+          const dateStr = `${year}-${month}-01`;
+          const date = parseISO(dateStr);
+          if (isValid(date)) {
+            const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+            const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
+            query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+          }
         } else {
           query = query.gte('DATA VENCIMENTO', `${year}-01-01`).lte('DATA VENCIMENTO', `${year}-12-31`);
         }
       }
 
       const { data, error } = await query.order('DATA VENCIMENTO', { ascending: true });
-      
       if (error) throw error;
       return data;
     },
@@ -48,7 +50,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
 
   if (isLoading) {
     return (
-      <Card className="col-span-1 lg:col-span-2 border-none shadow-sm flex items-center justify-center p-12">
+      <Card className="border-none shadow-sm flex items-center justify-center p-12">
         <Loader2 className="h-8 w-8 text-rose-600 animate-spin" />
       </Card>
     );
@@ -56,7 +58,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
 
   if (error) {
     return (
-      <Card className="col-span-1 lg:col-span-2 border-none shadow-sm p-12 text-center">
+      <Card className="border-none shadow-sm p-12 text-center">
         <AlertCircle className="h-12 w-12 text-rose-600 mx-auto mb-4" />
         <h3 className="text-lg font-semibold">Erro ao carregar dados</h3>
         <p className="text-muted-foreground">Verifique sua conexão ou permissões.</p>
@@ -65,59 +67,66 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
   }
 
   return (
-    <Card className="col-span-1 lg:col-span-2 border-none shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="border-none shadow-sm overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
         <CardTitle className="text-lg font-semibold">
-          Despesas do Período
+          Despesas
         </CardTitle>
-        <Badge variant="outline">{transactions?.length || 0} itens</Badge>
+        <Badge variant="secondary" className="font-medium">
+          {transactions?.length || 0} itens
+        </Badge>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Vencimento</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions?.map((item) => {
-              const config = categoryIcons[item.CATEGORIA] || categoryIcons["Outros"];
-              return (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${config.bg}`}>
-                        <config.icon className={`h-4 w-4 ${config.color}`} />
+      <CardContent className="p-0 md:p-6">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="pl-4 md:pl-0">Descrição</TableHead>
+                <TableHead className="hidden sm:table-cell">Categoria</TableHead>
+                <TableHead>Vencimento</TableHead>
+                <TableHead className="text-right pr-4 md:pr-0">Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions?.map((item) => {
+                const config = categoryIcons[item.CATEGORIA] || categoryIcons["Outros"];
+                return (
+                  <TableRow key={item.id} className="group">
+                    <TableCell className="font-medium pl-4 md:pl-0">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className={`p-1.5 md:p-2 rounded-full ${config.bg} shrink-0`}>
+                          <config.icon className={`h-3.5 w-3.5 md:h-4 md:w-4 ${config.color}`} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm md:text-base line-clamp-1">{item.DESCRIÇÃO}</span>
+                          <span className="text-[10px] text-muted-foreground sm:hidden">{item.CATEGORIA}</span>
+                        </div>
                       </div>
-                      {item.DESCRIÇÃO}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="font-normal">
-                      {item.CATEGORIA}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('pt-BR') : '-'}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold text-rose-600">
-                    {Number(item.VALOR).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge variant="outline" className="font-normal text-xs">
+                        {item.CATEGORIA}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-xs md:text-sm whitespace-nowrap">
+                      {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-rose-600 pr-4 md:pr-0 text-sm md:text-base">
+                      {Number(item.VALOR).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {transactions?.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                    Nenhuma despesa encontrada.
                   </TableCell>
                 </TableRow>
-              );
-            })}
-            {transactions?.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                  Nenhuma despesa encontrada para este período.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

@@ -7,82 +7,74 @@ import ExpenseChart from "@/components/dashboard/ExpenseChart";
 import AddTransactionDialog from "@/components/dashboard/AddTransactionDialog";
 import PeriodFilter from "@/components/dashboard/PeriodFilter";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Bell, Search, LogOut, UserCircle } from "lucide-react";
+import { LogOut, UserCircle, Wallet } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 
 const Index = () => {
   const { signOut } = useAuth();
-  
-  // Estado separado para mês e ano
   const [month, setMonth] = useState(format(new Date(), 'MM'));
   const [year, setYear] = useState(format(new Date(), 'yyyy'));
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12">
-      <header className="sticky top-0 z-10 w-full border-b bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-20 w-full border-b bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">D</span>
+            <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center shrink-0">
+              <Wallet className="text-white h-5 w-5" />
             </div>
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-600 to-orange-600">
+            <h1 className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-600 to-orange-600 truncate">
               GastosCasa
             </h1>
           </div>
           
-          <div className="hidden md:flex items-center bg-slate-100 rounded-full px-3 py-1.5 w-96">
-            <Search className="h-4 w-4 text-muted-foreground mr-2" />
-            <input 
-              type="text" 
-              placeholder="Buscar despesas..." 
-              className="bg-transparent border-none outline-none text-sm w-full"
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-muted-foreground hover:text-rose-600 transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
+          <div className="flex items-center gap-2 md:gap-4">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => signOut()}
-              className="text-muted-foreground hover:text-rose-600"
+              className="text-muted-foreground hover:text-rose-600 h-9 w-9"
             >
               <LogOut className="h-5 w-5" />
             </Button>
-            <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+            <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
               <UserCircle className="h-6 w-6" />
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 pt-8 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Controle de Gastos 👋</h2>
-            <p className="text-muted-foreground">Acompanhe para onde está indo o dinheiro da sua casa.</p>
+      <main className="container mx-auto px-4 pt-6 md:pt-8 space-y-6 md:space-y-8">
+        <div className="flex flex-col gap-6">
+          <div className="space-y-1">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Controle de Gastos 👋</h2>
+            <p className="text-sm md:text-base text-muted-foreground">Acompanhe as finanças da sua casa.</p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
             <PeriodFilter 
               month={month} 
               year={year} 
               onMonthChange={setMonth} 
               onYearChange={setYear} 
             />
-            <AddTransactionDialog />
+            <div className="pt-2 sm:pt-0">
+              <AddTransactionDialog />
+            </div>
           </div>
         </div>
 
         <SummaryCards month={month} year={year} />
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <TransactionList month={month} year={year} />
-          <ExpenseChart month={month} year={year} />
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <TransactionList month={month} year={year} />
+          </div>
+          <div className="order-1 lg:order-2">
+            <ExpenseChart month={month} year={year} />
+          </div>
         </div>
       </main>
 

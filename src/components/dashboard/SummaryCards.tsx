@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownCircle, Loader2 } from "lucide-react";
-import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
+import { startOfMonth, endOfMonth, parseISO, format, isValid } from 'date-fns';
 
 interface SummaryCardsProps {
   month: string;
@@ -20,13 +20,15 @@ const SummaryCards = ({ month, year }: SummaryCardsProps) => {
       
       if (year !== 'all') {
         if (month !== 'all') {
-          // Mês e Ano específicos
-          const date = parseISO(`${year}-${month}-01`);
-          const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
-          const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
-          query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+          const dateStr = `${year}-${month}-01`;
+          const date = parseISO(dateStr);
+          
+          if (isValid(date)) {
+            const startDate = format(startOfMonth(date), 'yyyy-MM-dd');
+            const endDate = format(endOfMonth(date), 'yyyy-MM-dd');
+            query = query.gte('DATA VENCIMENTO', startDate).lte('DATA VENCIMENTO', endDate);
+          }
         } else {
-          // Ano inteiro
           query = query.gte('DATA VENCIMENTO', `${year}-01-01`).lte('DATA VENCIMENTO', `${year}-12-31`);
         }
       }
@@ -38,8 +40,8 @@ const SummaryCards = ({ month, year }: SummaryCardsProps) => {
   });
 
   return (
-    <div className="flex justify-start">
-      <Card className="w-full md:w-72 border-none shadow-sm hover:shadow-md transition-shadow bg-white">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Card className="border-none shadow-sm hover:shadow-md transition-shadow bg-white">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total de Gastos
@@ -52,11 +54,11 @@ const SummaryCards = ({ month, year }: SummaryCardsProps) => {
           {isLoading ? (
             <Loader2 className="h-6 w-6 text-rose-600 animate-spin" />
           ) : (
-            <div className="text-3xl font-bold text-rose-600">
+            <div className="text-2xl md:text-3xl font-bold text-rose-600">
               {total?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
           )}
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
             No período selecionado
           </p>
         </CardContent>
