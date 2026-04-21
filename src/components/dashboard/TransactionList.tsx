@@ -16,6 +16,14 @@ interface TransactionListProps {
   year: string;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  'Housing': 'Moradia',
+  'Food': 'Alimentação',
+  'Transport': 'Transporte',
+  'Leisure': 'Lazer',
+  'Others': 'Outros',
+};
+
 const categoryIcons: Record<string, any> = {
   "Food": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
   "Housing": { icon: Home, color: "text-blue-600", bg: "bg-blue-50" },
@@ -65,10 +73,10 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['total-expenses'] });
       queryClient.invalidateQueries({ queryKey: ['chart-data'] });
-      showSuccess('Expense deleted successfully');
+      showSuccess('Despesa excluída com sucesso');
     },
     onError: (error: any) => {
-      showError('Error deleting expense: ' + error.message);
+      showError('Erro ao excluir despesa: ' + error.message);
     }
   });
 
@@ -84,8 +92,8 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
     return (
       <Card className="border-none shadow-sm p-12 text-center">
         <AlertCircle className="h-12 w-12 text-rose-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold">Error loading data</h3>
-        <p className="text-muted-foreground">Check your connection or permissions.</p>
+        <h3 className="text-lg font-semibold">Erro ao carregar dados</h3>
+        <p className="text-muted-foreground">Verifique sua conexão ou permissões.</p>
       </Card>
     );
   }
@@ -94,10 +102,10 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
     <Card className="border-none shadow-sm overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
         <CardTitle className="text-lg font-semibold">
-          Expenses
+          Despesas
         </CardTitle>
         <Badge variant="secondary" className="font-medium">
-          {transactions?.length || 0} items
+          {transactions?.length || 0} itens
         </Badge>
       </CardHeader>
       <CardContent className="p-0 md:p-6">
@@ -105,10 +113,10 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="pl-4 md:pl-0">Description</TableHead>
-                <TableHead className="hidden sm:table-cell">Category</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="pl-4 md:pl-0">Descrição</TableHead>
+                <TableHead className="hidden sm:table-cell">Categoria</TableHead>
+                <TableHead>Vencimento</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -124,20 +132,20 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm md:text-base line-clamp-1">{item.DESCRIÇÃO}</span>
-                          <span className="text-[10px] text-muted-foreground sm:hidden">{item.CATEGORIA}</span>
+                          <span className="text-[10px] text-muted-foreground sm:hidden">{CATEGORY_LABELS[item.CATEGORIA] || item.CATEGORIA}</span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <Badge variant="outline" className="font-normal text-xs">
-                        {item.CATEGORIA}
+                        {CATEGORY_LABELS[item.CATEGORIA] || item.CATEGORIA}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs md:text-sm whitespace-nowrap">
-                      {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }) : '-'}
+                      {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
                     </TableCell>
                     <TableCell className="text-right font-semibold text-rose-600 text-sm md:text-base">
-                      {Number(item.VALOR).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      {Number(item.VALOR).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </TableCell>
                     <TableCell className="pr-4 md:pr-0">
                       <Button
@@ -146,6 +154,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                         className="h-8 w-8 text-muted-foreground hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => deleteMutation.mutate(item.id)}
                         disabled={deleteMutation.isPending}
+                        title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -156,7 +165,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
               {transactions?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                    No expenses found.
+                    Nenhuma despesa encontrada.
                   </TableCell>
                 </TableRow>
               )}

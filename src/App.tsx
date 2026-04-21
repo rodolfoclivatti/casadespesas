@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="h-8 w-8 text-rose-600 animate-spin mb-4" />
-        <p className="text-slate-600 font-medium">Verifying authentication...</p>
+        <p className="text-slate-600 font-medium">Verificando autenticação...</p>
       </div>
     );
   }

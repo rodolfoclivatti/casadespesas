@@ -22,6 +22,14 @@ interface ExpenseChartProps {
   year: string;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  'Housing': 'Moradia',
+  'Food': 'Alimentação',
+  'Transport': 'Transporte',
+  'Leisure': 'Lazer',
+  'Others': 'Outros',
+};
+
 const COLORS: Record<string, string> = {
   'Housing': '#4F46E5',
   'Food': '#10B981',
@@ -57,7 +65,8 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
       }, {});
 
       return Object.keys(grouped).map(key => ({
-        name: key,
+        name: CATEGORY_LABELS[key] || key,
+        originalKey: key,
         value: grouped[key],
         color: COLORS[key] || COLORS['Others']
       }));
@@ -67,7 +76,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
   return (
     <Card className="col-span-1 border-none shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Distribution by Category</CardTitle>
+        <CardTitle className="text-lg font-semibold">Distribuição por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full flex items-center justify-center">
@@ -97,7 +106,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
                     fontSize: '12px'
                   }}
                   formatter={(value: number) => [
-                    value.toLocaleString('en-US', { style: 'currency', currency: 'USD' }), 
+                    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), 
                     'Total'
                   ]}
                 />

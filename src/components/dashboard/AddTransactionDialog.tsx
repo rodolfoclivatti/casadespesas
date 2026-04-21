@@ -33,15 +33,15 @@ import { useAuth } from '@/components/auth/AuthProvider';
 // Define the validation schema
 const formSchema = z.object({
   description: z.string()
-    .min(2, "Description must be at least 2 characters")
-    .max(100, "Description is too long")
+    .min(2, "A descrição deve ter pelo menos 2 caracteres")
+    .max(100, "A descrição é muito longa")
     .trim(),
   amount: z.string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-      message: "Amount must be a valid number greater than 0",
+      message: "O valor deve ser um número válido maior que 0",
     }),
-  category: z.string().min(1, "Please select a category"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  category: z.string().min(1, "Por favor, selecione uma categoria"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de data inválido"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -63,7 +63,7 @@ const AddTransactionDialog = () => {
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      if (!user) throw new Error("User not authenticated");
+      if (!user) throw new Error("Usuário não autenticado");
 
       const { error } = await supabase
         .from('DESPESAS FINANCEIRAS')
@@ -81,13 +81,13 @@ const AddTransactionDialog = () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['total-expenses'] });
       queryClient.invalidateQueries({ queryKey: ['chart-data'] });
-      showSuccess('Expense added successfully!');
+      showSuccess('Despesa adicionada com sucesso!');
       setOpen(false);
       form.reset();
     },
     onError: (error: any) => {
-      console.error("Error saving expense:", error);
-      showError('Failed to save expense. Please try again.');
+      console.error("Erro ao salvar despesa:", error);
+      showError('Falha ao salvar despesa. Por favor, tente novamente.');
     }
   });
 
@@ -103,16 +103,16 @@ const AddTransactionDialog = () => {
       <DialogTrigger asChild>
         <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-full px-6">
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Expense
+          Nova Despesa
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Add Expense</DialogTitle>
+              <DialogTitle>Adicionar Despesa</DialogTitle>
               <DialogDescription>
-                Fill in the details of your new expense.
+                Preencha os detalhes da sua nova despesa.
               </DialogDescription>
             </DialogHeader>
             
@@ -121,9 +121,9 @@ const AddTransactionDialog = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Rent, Groceries..." {...field} />
+                    <Input placeholder="Ex: Aluguel, Mercado..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,12 +135,12 @@ const AddTransactionDialog = () => {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Valor (R$)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       step="0.01" 
-                      placeholder="0.00" 
+                      placeholder="0,00" 
                       {...field} 
                     />
                   </FormControl>
@@ -154,19 +154,19 @@ const AddTransactionDialog = () => {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Categoria</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Housing">Housing</SelectItem>
-                      <SelectItem value="Food">Food</SelectItem>
-                      <SelectItem value="Transport">Transport</SelectItem>
-                      <SelectItem value="Leisure">Leisure</SelectItem>
-                      <SelectItem value="Others">Others</SelectItem>
+                      <SelectItem value="Housing">Moradia</SelectItem>
+                      <SelectItem value="Food">Alimentação</SelectItem>
+                      <SelectItem value="Transport">Transporte</SelectItem>
+                      <SelectItem value="Leisure">Lazer</SelectItem>
+                      <SelectItem value="Others">Outros</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -179,7 +179,7 @@ const AddTransactionDialog = () => {
               name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Due Date</FormLabel>
+                  <FormLabel>Data de Vencimento</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -197,9 +197,9 @@ const AddTransactionDialog = () => {
                 {mutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    Salvando...
                   </>
-                ) : 'Save Expense'}
+                ) : 'Salvar Despesa'}
               </Button>
             </DialogFooter>
           </form>

@@ -36,6 +36,7 @@ const Index = () => {
               size="icon" 
               onClick={() => signOut()}
               className="text-muted-foreground hover:text-rose-600 h-9 w-9"
+              title="Sair"
             >
               <LogOut className="h-5 w-5" />
             </Button>
@@ -49,8 +50,8 @@ const Index = () => {
       <main className="container mx-auto px-4 pt-6 md:pt-8 space-y-6 md:space-y-8">
         <div className="flex flex-col gap-6">
           <div className="space-y-1">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Expense Tracker 👋</h2>
-            <p className="text-sm md:text-base text-muted-foreground">Track your home finances efficiently.</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Controle de Gastos 👋</h2>
+            <p className="text-sm md:text-base text-muted-foreground">Acompanhe suas finanças domésticas com eficiência.</p>
           </div>
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
