@@ -32,7 +32,7 @@ const AddTransactionDialog = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Usuário não autenticado");
+      if (!user) throw new Error("User not authenticated");
 
       const { error } = await supabase
         .from('DESPESAS FINANCEIRAS')
@@ -50,12 +50,12 @@ const AddTransactionDialog = () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['total-expenses'] });
       queryClient.invalidateQueries({ queryKey: ['chart-data'] });
-      showSuccess('Despesa adicionada com sucesso!');
+      showSuccess('Expense added successfully!');
       setOpen(false);
       resetForm();
     },
     onError: (error: any) => {
-      showError('Erro ao salvar despesa: ' + error.message);
+      showError('Error saving expense: ' + error.message);
     }
   });
 
@@ -69,7 +69,7 @@ const AddTransactionDialog = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !amount || !category || !date) {
-      showError('Por favor, preencha todos os campos.');
+      showError('Please fill in all fields.');
       return;
     }
     mutation.mutate();
@@ -80,55 +80,55 @@ const AddTransactionDialog = () => {
       <DialogTrigger asChild>
         <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-full px-6">
           <PlusCircle className="mr-2 h-4 w-4" />
-          Nova Despesa
+          New Expense
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Adicionar Despesa</DialogTitle>
+            <DialogTitle>Add Expense</DialogTitle>
             <DialogDescription>
-              Preencha os detalhes do seu novo gasto.
+              Fill in the details of your new expense.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">Description</Label>
               <Input 
                 id="description" 
-                placeholder="Ex: Aluguel, Mercado..." 
+                placeholder="Ex: Rent, Groceries..." 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="amount">Valor (R$)</Label>
+              <Label htmlFor="amount">Amount ($)</Label>
               <Input 
                 id="amount" 
                 type="number" 
                 step="0.01"
-                placeholder="0,00" 
+                placeholder="0.00" 
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="category">Category</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Moradia">Moradia</SelectItem>
-                  <SelectItem value="Alimentação">Alimentação</SelectItem>
-                  <SelectItem value="Transporte">Transporte</SelectItem>
-                  <SelectItem value="Lazer">Lazer</SelectItem>
-                  <SelectItem value="Outros">Outros</SelectItem>
+                  <SelectItem value="Housing">Housing</SelectItem>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Transport">Transport</SelectItem>
+                  <SelectItem value="Leisure">Leisure</SelectItem>
+                  <SelectItem value="Others">Others</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="date">Data de Vencimento</Label>
+              <Label htmlFor="date">Due Date</Label>
               <Input 
                 id="date" 
                 type="date" 
@@ -146,9 +146,9 @@ const AddTransactionDialog = () => {
               {mutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
+                  Saving...
                 </>
-              ) : 'Salvar Despesa'}
+              ) : 'Save Expense'}
             </Button>
           </DialogFooter>
         </form>

@@ -15,11 +15,11 @@ interface TransactionListProps {
 }
 
 const categoryIcons: Record<string, any> = {
-  "Alimentação": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
-  "Moradia": { icon: Home, color: "text-blue-600", bg: "bg-blue-50" },
-  "Transporte": { icon: Car, color: "text-amber-600", bg: "bg-amber-50" },
-  "Lazer": { icon: Coffee, color: "text-rose-600", bg: "bg-rose-50" },
-  "Outros": { icon: HelpCircle, color: "text-slate-600", bg: "bg-slate-50" },
+  "Food": { icon: Utensils, color: "text-emerald-600", bg: "bg-emerald-50" },
+  "Housing": { icon: Home, color: "text-blue-600", bg: "bg-blue-50" },
+  "Transport": { icon: Car, color: "text-amber-600", bg: "bg-amber-50" },
+  "Leisure": { icon: Coffee, color: "text-rose-600", bg: "bg-rose-50" },
+  "Others": { icon: HelpCircle, color: "text-slate-600", bg: "bg-slate-50" },
 };
 
 const TransactionList = ({ month, year }: TransactionListProps) => {
@@ -60,8 +60,8 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
     return (
       <Card className="border-none shadow-sm p-12 text-center">
         <AlertCircle className="h-12 w-12 text-rose-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold">Erro ao carregar dados</h3>
-        <p className="text-muted-foreground">Verifique sua conexão ou permissões.</p>
+        <h3 className="text-lg font-semibold">Error loading data</h3>
+        <p className="text-muted-foreground">Check your connection or permissions.</p>
       </Card>
     );
   }
@@ -70,10 +70,10 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
     <Card className="border-none shadow-sm overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
         <CardTitle className="text-lg font-semibold">
-          Despesas
+          Expenses
         </CardTitle>
         <Badge variant="secondary" className="font-medium">
-          {transactions?.length || 0} itens
+          {transactions?.length || 0} items
         </Badge>
       </CardHeader>
       <CardContent className="p-0 md:p-6">
@@ -81,15 +81,15 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="pl-4 md:pl-0">Descrição</TableHead>
-                <TableHead className="hidden sm:table-cell">Categoria</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead className="text-right pr-4 md:pr-0">Valor</TableHead>
+                <TableHead className="pl-4 md:pl-0">Description</TableHead>
+                <TableHead className="hidden sm:table-cell">Category</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead className="text-right pr-4 md:pr-0">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {transactions?.map((item) => {
-                const config = categoryIcons[item.CATEGORIA] || categoryIcons["Outros"];
+                const config = categoryIcons[item.CATEGORIA] || categoryIcons["Others"];
                 return (
                   <TableRow key={item.id} className="group">
                     <TableCell className="font-medium pl-4 md:pl-0">
@@ -109,10 +109,10 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs md:text-sm whitespace-nowrap">
-                      {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                      {item["DATA VENCIMENTO"] ? new Date(item["DATA VENCIMENTO"]).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }) : '-'}
                     </TableCell>
                     <TableCell className="text-right font-semibold text-rose-600 pr-4 md:pr-0 text-sm md:text-base">
-                      {Number(item.VALOR).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {Number(item.VALOR).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     </TableCell>
                   </TableRow>
                 );
@@ -120,7 +120,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
               {transactions?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                    Nenhuma despesa encontrada.
+                    No expenses found.
                   </TableCell>
                 </TableRow>
               )}

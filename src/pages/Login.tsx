@@ -26,15 +26,15 @@ const Login = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-600 rounded-2xl mb-4 shadow-lg shadow-rose-200">
             <Home className="text-white h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">GastosCasa</h1>
-          <p className="text-slate-500 mt-2">Organize as finanças do seu lar de forma simples</p>
+          <h1 className="text-3xl font-bold text-slate-900">HomeExpenses</h1>
+          <p className="text-slate-500 mt-2">Organize your home finances simply</p>
         </div>
 
         <Card className="border-none shadow-xl rounded-2xl overflow-hidden">
           <CardHeader className="space-y-1 pt-8">
-            <CardTitle className="text-2xl text-center">Bem-vindo</CardTitle>
+            <CardTitle className="text-2xl text-center">Welcome</CardTitle>
             <CardDescription className="text-center">
-              Entre ou crie sua conta para continuar
+              Sign in or create an account to continue
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-8">
@@ -55,14 +55,14 @@ const Login = () => {
               localization={{
                 variables: {
                   sign_in: {
-                    email_label: 'E-mail',
-                    password_label: 'Senha',
-                    button_label: 'Entrar',
+                    email_label: 'Email',
+                    password_label: 'Password',
+                    button_label: 'Sign In',
                   },
                   sign_up: {
-                    email_label: 'E-mail',
-                    password_label: 'Senha',
-                    button_label: 'Cadastrar',
+                    email_label: 'Email',
+                    password_label: 'Password',
+                    button_label: 'Sign Up',
                   }
                 }
               }}

@@ -23,11 +23,11 @@ interface ExpenseChartProps {
 }
 
 const COLORS: Record<string, string> = {
-  'Moradia': '#4F46E5',
-  'Alimentação': '#10B981',
-  'Transporte': '#F59E0B',
-  'Lazer': '#EC4899',
-  'Outros': '#6B7280',
+  'Housing': '#4F46E5',
+  'Food': '#10B981',
+  'Transport': '#F59E0B',
+  'Leisure': '#EC4899',
+  'Others': '#6B7280',
 };
 
 const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
@@ -51,7 +51,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
       if (error) throw error;
 
       const grouped = data.reduce((acc: any, curr) => {
-        const cat = curr.CATEGORIA || 'Outros';
+        const cat = curr.CATEGORIA || 'Others';
         acc[cat] = (acc[cat] || 0) + Number(curr.VALOR);
         return acc;
       }, {});
@@ -59,7 +59,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
       return Object.keys(grouped).map(key => ({
         name: key,
         value: grouped[key],
-        color: COLORS[key] || COLORS['Outros']
+        color: COLORS[key] || COLORS['Others']
       }));
     },
   });
@@ -67,7 +67,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
   return (
     <Card className="col-span-1 border-none shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Distribuição por Categoria</CardTitle>
+        <CardTitle className="text-lg font-semibold">Distribution by Category</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full flex items-center justify-center">
@@ -97,7 +97,7 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
                     fontSize: '12px'
                   }}
                   formatter={(value: number) => [
-                    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), 
+                    value.toLocaleString('en-US', { style: 'currency', currency: 'USD' }), 
                     'Total'
                   ]}
                 />

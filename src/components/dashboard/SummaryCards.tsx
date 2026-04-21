@@ -44,7 +44,7 @@ const SummaryCards = ({ month, year }: SummaryCardsProps) => {
       <Card className="border-none shadow-sm hover:shadow-md transition-shadow bg-white">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total de Gastos
+            Total Expenses
           </CardTitle>
           <div className="p-2 rounded-full bg-rose-50">
             <ArrowDownCircle className="h-4 w-4 text-rose-600" />
@@ -55,11 +55,11 @@ const SummaryCards = ({ month, year }: SummaryCardsProps) => {
             <Loader2 className="h-6 w-6 text-rose-600 animate-spin" />
           ) : (
             <div className="text-2xl md:text-3xl font-bold text-rose-600">
-              {total?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              {total?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
             </div>
           )}
           <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-            No período selecionado
+            In the selected period
           </p>
         </CardContent>
       </Card>
