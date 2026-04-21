@@ -6,7 +6,6 @@ import TransactionList from "@/components/dashboard/TransactionList";
 import ExpenseChart from "@/components/dashboard/ExpenseChart";
 import AddTransactionDialog from "@/components/dashboard/AddTransactionDialog";
 import PeriodFilter from "@/components/dashboard/PeriodFilter";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { LogOut, UserCircle, Wallet } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -78,10 +77,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-
-      <footer className="mt-12">
-        <MadeWithDyad />
-      </footer>
     </div>
   );
 };
