@@ -1,13 +1,14 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Home, Car, Coffee, Utensils, HelpCircle, Loader2, AlertCircle, Trash2, Search, ArrowDownAZ, ArrowUpAZ, X } from "lucide-react";
 import { startOfMonth, endOfMonth, parseISO, format, isValid } from 'date-fns';
 import { showSuccess, showError } from '@/utils/toast';
 
@@ -34,12 +35,14 @@ const categoryIcons: Record<string, any> = {
 
 const TransactionList = ({ month, year }: TransactionListProps) => {
   const queryClient = useQueryClient();
+  const [searchCategory, setSearchCategory] = useState('');
+  const [sortAlpha, setSortAlpha] = useState<'asc' | 'desc' | null>(null);
 
   const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['transactions', month, year],
     queryFn: async () => {
       let query = supabase.from('DESPESAS FINANCEIRAS').select('*');
-      
+
       if (year !== 'all') {
         if (month !== 'all') {
           const dateStr = `${year}-${month}-01`;
@@ -66,7 +69,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
         .from('DESPESAS FINANCEIRAS')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -79,6 +82,52 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
       showError('Erro ao excluir despesa: ' + error.message);
     }
   });
+
+  // Filtra e ordena as transações conforme busca e ordenação
+  const filteredAndSorted = useMemo(() => {
+    if (!transactions) return [];
+
+    let result = [...transactions];
+
+    // Filtro por categoria (busca em português ou inglês)
+    if (searchCategory.trim()) {
+      const term = searchCategory.trim().toLowerCase();
+      result = result.filter((item) => {
+        const labelPt = (CATEGORY_LABELS[item.CATEGORIA] || item.CATEGORIA || '').toLowerCase();
+        const labelEn = (item.CATEGORIA || '').toLowerCase();
+        return labelPt.includes(term) || labelEn.includes(term);
+      });
+    }
+
+    // Ordenação alfabética por categoria (nome em português)
+    if (sortAlpha === 'asc') {
+      result.sort((a, b) => {
+        const labelA = CATEGORY_LABELS[a.CATEGORIA] || a.CATEGORIA || '';
+        const labelB = CATEGORY_LABELS[b.CATEGORIA] || b.CATEGORIA || '';
+        return labelA.localeCompare(labelB, 'pt-BR');
+      });
+    } else if (sortAlpha === 'desc') {
+      result.sort((a, b) => {
+        const labelA = CATEGORY_LABELS[a.CATEGORIA] || a.CATEGORIA || '';
+        const labelB = CATEGORY_LABELS[b.CATEGORIA] || b.CATEGORIA || '';
+        return labelB.localeCompare(labelA, 'pt-BR');
+      });
+    }
+
+    return result;
+  }, [transactions, searchCategory, sortAlpha]);
+
+  const handleSortToggle = () => {
+    setSortAlpha((prev) => {
+      if (prev === null) return 'asc';
+      if (prev === 'asc') return 'desc';
+      return null;
+    });
+  };
+
+  const handleClearSearch = () => {
+    setSearchCategory('');
+  };
 
   if (isLoading) {
     return (
@@ -105,10 +154,74 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
           Despesas
         </CardTitle>
         <Badge variant="secondary" className="font-medium">
-          {transactions?.length || 0} itens
+          {filteredAndSorted.length} {filteredAndSorted.length !== transactions?.length ? `de ${transactions?.length} ` : ''}itens
         </Badge>
       </CardHeader>
-      <CardContent className="p-0 md:p-6">
+
+      {/* Barra de busca e ordenação */}
+      <div className="px-4 md:px-6 pb-4 flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder="Buscar por categoria..."
+            value={searchCategory}
+            onChange={(e) => setSearchCategory(e.target.value)}
+            className="pl-9 pr-9 h-9 text-sm bg-slate-50 border-slate-200 focus-visible:ring-rose-500"
+          />
+          {searchCategory && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700 transition-colors"
+              aria-label="Limpar busca"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        <Button
+          variant={sortAlpha !== null ? "default" : "outline"}
+          size="sm"
+          onClick={handleSortToggle}
+          className={`h-9 gap-1.5 shrink-0 text-sm ${sortAlpha !== null ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600' : 'border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300'}`}
+          title={sortAlpha === null ? 'Ordenar A→Z' : sortAlpha === 'asc' ? 'Ordenar Z→A' : 'Remover ordenação'}
+        >
+          {sortAlpha === 'desc' ? (
+            <ArrowUpAZ className="h-4 w-4" />
+          ) : (
+            <ArrowDownAZ className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">
+            {sortAlpha === null ? 'A→Z' : sortAlpha === 'asc' ? 'Z→A' : 'A→Z'}
+          </span>
+        </Button>
+      </div>
+
+      {/* Chips de categoria ativa */}
+      {searchCategory.trim() && (
+        <div className="px-4 md:px-6 pb-3 flex flex-wrap gap-2">
+          {Object.entries(CATEGORY_LABELS)
+            .filter(([, label]) =>
+              label.toLowerCase().includes(searchCategory.trim().toLowerCase())
+            )
+            .map(([key, label]) => {
+              const config = categoryIcons[key] || categoryIcons["Others"];
+              return (
+                <Badge
+                  key={key}
+                  variant="outline"
+                  className={`gap-1 ${config.color} border-current/30 cursor-pointer`}
+                  onClick={() => setSearchCategory(label)}
+                >
+                  <config.icon className="h-3 w-3" />
+                  {label}
+                </Badge>
+              );
+            })}
+        </div>
+      )}
+
+      <CardContent className="p-0 md:p-6 md:pt-0">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -121,7 +234,7 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions?.map((item) => {
+              {filteredAndSorted.map((item) => {
                 const config = categoryIcons[item.CATEGORIA] || categoryIcons["Others"];
                 return (
                   <TableRow key={item.id} className="group">
@@ -162,10 +275,12 @@ const TransactionList = ({ month, year }: TransactionListProps) => {
                   </TableRow>
                 );
               })}
-              {transactions?.length === 0 && (
+              {filteredAndSorted.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                    Nenhuma despesa encontrada.
+                    {searchCategory.trim()
+                      ? `Nenhuma despesa encontrada para "${searchCategory}".`
+                      : 'Nenhuma despesa encontrada.'}
                   </TableCell>
                 </TableRow>
               )}
