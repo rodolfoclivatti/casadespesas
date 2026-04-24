@@ -4,13 +4,13 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   Cell
 } from 'recharts';
@@ -38,12 +38,32 @@ const COLORS: Record<string, string> = {
   'Others': '#6B7280',
 };
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{
+        background: '#fff',
+        borderRadius: 8,
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        padding: '8px 12px',
+        fontSize: 12,
+      }}>
+        <p style={{ fontWeight: 600, marginBottom: 2, color: '#1e293b' }}>{label}</p>
+        <p style={{ color: '#e11d48' }}>
+          {Number(payload[0].value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
   const { data: chartData, isLoading } = useQuery({
     queryKey: ['chart-data', month, year],
     queryFn: async () => {
       let query = supabase.from('DESPESAS FINANCEIRAS').select('CATEGORIA, VALOR, "DATA VENCIMENTO"');
-      
+
       if (year !== 'all') {
         if (month !== 'all') {
           const date = parseISO(`${year}-${month}-01`);
@@ -64,14 +84,20 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
         return acc;
       }, {});
 
-      return Object.keys(grouped).map(key => ({
-        name: CATEGORY_LABELS[key] || key,
-        originalKey: key,
-        value: grouped[key],
-        color: COLORS[key] || COLORS['Others']
-      }));
+      return Object.keys(grouped)
+        .map(key => ({
+          name: CATEGORY_LABELS[key] || key,
+          originalKey: key,
+          value: grouped[key],
+          color: COLORS[key] || COLORS['Others'],
+        }))
+        // Ordem alfabética pelo nome em português
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     },
   });
+
+  // Altura dinâmica: 60px por barra + margens
+  const chartHeight = chartData ? Math.max(chartData.length * 60 + 16, 180) : 180;
 
   return (
     <Card className="col-span-1 border-none shadow-sm">
@@ -79,38 +105,36 @@ const ExpenseChart = ({ month, year }: ExpenseChartProps) => {
         <CardTitle className="text-lg font-semibold">Distribuição por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full flex items-center justify-center">
+        <div style={{ width: '100%', height: chartHeight }} className="flex items-center justify-center">
           {isLoading ? (
             <Loader2 className="h-8 w-8 text-rose-600 animate-spin" />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 5, right: 10, left: 10, bottom: 20 }}
+                layout="vertical"
+                margin={{ top: 4, right: 16, left: 4, bottom: 4 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="name" 
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis
+                  type="number"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#64748b', fontSize: 12 }}
-                  dy={10}
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  tickFormatter={(v) =>
+                    v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+                  }
                 />
-                <YAxis hide />
-                <Tooltip
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    fontSize: '12px'
-                  }}
-                  formatter={(value: number) => [
-                    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), 
-                    'Total'
-                  ]}
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#475569', fontSize: 13, fontWeight: 500 }}
+                  width={100}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={32}>
                   {chartData?.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
